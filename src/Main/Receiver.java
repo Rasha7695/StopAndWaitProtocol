@@ -23,6 +23,8 @@ public class Receiver
 			// Step 3 : revieve the data in byte buffer. 
 			ds.receive(DpReceive); 
 
+			
+
 			System.out.println("Client:-" + data(receive)); 
 
 			// Exit the server if the client sends "bye" 
