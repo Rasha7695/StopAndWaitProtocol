@@ -1,5 +1,4 @@
 package Main;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -32,7 +31,7 @@ public class Receiver
 
 		DatagramPacket DpReceive = null; 
 		DatagramPacket AckPacket = null;
-		FileOutputStream fileOuputStream = new FileOutputStream("Main\\outt",true);
+		FileOutputStream fileOuputStream = new FileOutputStream("outtt",true);
 		DpReceive = new DatagramPacket(handbyte, 1);
 		ds.receive(DpReceive);
 		//DatagramPacket handshPacket = new DatagramPacket(handbyte, 1);
@@ -62,14 +61,19 @@ public class Receiver
 
 
 			try {
+				if (ByteBuffer.wrap(sequenceNumber).getInt()%3==0){			 
+					continue;
+				}
+				else {
 				if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
 					ds.send(AckPacket);
 				}
+				
 				else{
 					dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
 					fileOuputStream.write(trim(data));
 					ds.send(AckPacket);
-				}
+				}}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
