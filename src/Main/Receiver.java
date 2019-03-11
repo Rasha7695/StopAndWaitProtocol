@@ -62,9 +62,14 @@ public class Receiver
 
 
 			try {
-			//	if(dupPackets(ByteBuffer.wrap(sequenceNumber).getInt()))
-				fileOuputStream.write(trim(data));
-				ds.send(AckPacket);
+				if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
+					ds.send(AckPacket);
+				}
+				else{
+					dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
+					fileOuputStream.write(trim(data));
+					ds.send(AckPacket);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
