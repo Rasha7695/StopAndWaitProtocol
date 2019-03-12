@@ -91,6 +91,8 @@ JTextField txtS;
 	    txtS = new JTextField();
 	   txtS.setBounds(10, 150, 120, 21);
 	   add(txtS);
+	     
+	   
 
 	    this.setVisible(true);
 	}
