@@ -1,4 +1,5 @@
 package Main;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -27,8 +29,18 @@ JTextField txtSenderPort;
 JTextField txtReceiverPort;
 JTextField txtFile;
 JButton btnProcess;
+JToggleButton reliable;
 JTextField txtS;
+//DatagramSocket ds;
 	public Receiver(){
+		// try{
+		// // 	ds = new DatagramSocket(null);
+		// // ds.setReuseAddress(true);
+		// // ds.bind(new InetSocketAddress("localhost", 1234));
+		// }
+		// catch(SocketException e){
+
+		// }
 		  this.setTitle("Receiver GUI");
 	    this.setSize(500,500);
 	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -63,8 +75,13 @@ JTextField txtS;
 	    txtFile.setBounds(60, 90, 120, 21);
 	    add(txtFile);
 	
-	    
-	    btnProcess = new JButton("TRANSFER");
+		reliable = new JToggleButton("Reliable");
+		reliable.setBounds(200,60,100,21);
+		reliable.addActionListener((ActionListener) this);
+		add(reliable);
+
+		
+	    btnProcess = new JButton("UPDATE");
 	    btnProcess.setBounds(200, 90, 100, 21);
 	    btnProcess.addActionListener((ActionListener) this);
 	    add(btnProcess);
@@ -99,87 +116,104 @@ public void actionPerformed(ActionEvent e) {
 	        } catch (IOException e1) {
 	            e1.printStackTrace();
 	        }
-	    } }
+		}
+	if (e.getSource().equals(reliable)) {
+		if (reliable.isSelected()) {//reliable option 
+			reliable.setText("Unreliable");
+			}
+		else {
+			//unreliable option
+			reliable.setText("Reliable");
+		}
+		}
+	}
+	
 
 	public void processInformation() throws UnknownHostException, IOException{
-		// InetAddress ip = InetAddress.getByName(txtName.getText());
-	    // int Senderport = Integer.parseInt(txtSenderPort.getText());
-	    // int Receiverport = Integer.parseInt(txtReceiverPort.getText());
-	    // File file = new File(txtFile.getText());
-	    
-	    // DatagramSocket ds = new DatagramSocket(Receiverport);
-		// byte[] receive = new byte[65535];
-		// byte[] handbyte = new byte[1]; 
+		InetAddress ip = InetAddress.getByName(txtName.getText());
+	    int Senderport = Integer.parseInt(txtSenderPort.getText());
+	    int Receiverport = Integer.parseInt(txtReceiverPort.getText());
+		File file = new File(txtFile.getText());
+		// this.ds = new DatagramSocket(null);
+		// this.ds.setReuseAddress(true);
+		// this.ds.bind(new InetSocketAddress("localhost", Receiverport));
+		byte[] receive = new byte[65535];
+		byte[] handbyte = new byte[1]; 
+		DatagramSocket ds = new DatagramSocket(1234);
 
-		// DatagramPacket DpReceive = null; 
-		// DatagramPacket AckPacket = null;
-		// FileOutputStream fileOuputStream = new FileOutputStream(file,true);
-		// DpReceive = new DatagramPacket(handbyte, 1);
-		// ds.receive(DpReceive);
-		// ds.send(DpReceive);
-		// handbyte = new byte[65535];
-		// HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
-		// int packet_num = 0;
-		// while (true) 
-		// {
-		// 	// Step 2 : create a DatgramPacket to receive the data. 
-		// 	DpReceive = new DatagramPacket(receive, receive.length);
+		DatagramPacket DpReceive = null; 
+		DatagramPacket AckPacket = null;
+		FileOutputStream fileOuputStream = new FileOutputStream(file,true);
+		DpReceive = new DatagramPacket(handbyte, 1);
+		ds.receive(DpReceive);
+		ds.send(DpReceive);
+		handbyte = new byte[65535];
+		HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
+		int packet_num = 0;
+		while (true) 
+		{
+			// Step 2 : create a DatgramPacket to receive the data. 
+			DpReceive = new DatagramPacket(receive, receive.length);
 
-		// 	// Step 3 : revieve the data in byte buffer. 
-		// 	ds.receive(DpReceive);
-		// 	InetAddress IPAddress = DpReceive.getAddress();
-		// 	int port = DpReceive.getPort();
-		// 	if (data(receive).toString().equals("EOT")) 
-		// 	{ 
-		// 		AckPacket = new DatagramPacket("EOT".getBytes(),3, IPAddress,port);
-		// 		ds.send(AckPacket);
-		// 		System.out.println("Client sent bye.....EXITING"); 
-		// 		break; 
-		// 	}
-		// 	packet_num++;
-		// 	System.out.println(data(receive));
-		// 	byte sequenceNumber[] = Arrays.copyOfRange(receive, 0, 4);
-		// 	System.out.println("Sequence Number:-" + ByteBuffer.wrap(sequenceNumber).getInt());
+			// Step 3 : revieve the data in byte buffer. 
+			ds.receive(DpReceive);
+			InetAddress IPAddress = DpReceive.getAddress();
+			int port = DpReceive.getPort();
+			if (data(receive).toString().equals("EOT")) 
+			{ 
+				AckPacket = new DatagramPacket("EOT".getBytes(),3, ip,Senderport);
+				ds.send(AckPacket);
+				System.out.println("Client sent bye.....EXITING"); 
+				packet_num =-1;
+				dupPackets.clear();
+				receive = new byte[65535]; 
+				continue; 
+			}
+			packet_num++;
+			System.out.println(data(receive));
+			byte sequenceNumber[] = Arrays.copyOfRange(receive, 0, 4);
+			System.out.println("Sequence Number:-" + ByteBuffer.wrap(sequenceNumber).getInt());
 			
-		// 	AckPacket = new DatagramPacket(sequenceNumber, sequenceNumber.length, IPAddress,port);
-		// 	byte data[] = Arrays.copyOfRange(receive, 4, receive.length);
-		// 	System.out.println("Packet Num: "+packet_num);
+			AckPacket = new DatagramPacket(sequenceNumber, sequenceNumber.length, ip,Senderport);
+			byte data[] = Arrays.copyOfRange(receive, 4, receive.length);
+			System.out.println("Packet Num: "+packet_num);
 
-		// 	try {
-		// 		if (packet_num%3==0){			 
-		// 			continue;
-		// 		}
-		// 		else {
-		// 		if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
-		// 			ds.send(AckPacket);
-		// 		}
+			try {
+				if (!this.reliable.isSelected() && packet_num%10==0){			 
+					continue;
+				}
+				else {
+					this.txtS.setText(Integer.toString(packet_num) );
+				if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
+					ds.send(AckPacket);
+				}
 				
-		// 		else{
-		// 			dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
-		// 			fileOuputStream.write(trim(data));
-		// 			ds.send(AckPacket);
-		// 		}
-		// 		}
-		// 	} catch (IOException e) {
-		// 		e.printStackTrace();
-		// 	}
+				else{
+					dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
+					fileOuputStream.write(trim(data));
+					ds.send(AckPacket);
+				}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	
 			
 
-		// 	System.out.println("Client:-" + data(data)); 
+			System.out.println("Client:-" + data(data)); 
 
-		// 	// Exit the server if the client sends "bye" 
+			// Exit the server if the client sends "bye" 
 			
-		// 	// Clear the buffer after every message. 
-		// 	receive = new byte[65535]; 
-		// } 
+			// Clear the buffer after every message. 
+			receive = new byte[65535]; 
+		} 
 	}
 	
 	
 	
 	public static void main(String[] args) throws IOException 
 	{ 
-	  //new Receiver();
+	    Receiver R = new Receiver();
 	  	// InetAddress ip = InetAddress.getByName(txtName.getText());
 	    // int Senderport = Integer.parseInt(txtSenderPort.getText());
 	    // int Receiverport = Integer.parseInt(txtReceiverPort.getText());
@@ -211,7 +245,7 @@ public void actionPerformed(ActionEvent e) {
 				AckPacket = new DatagramPacket("EOT".getBytes(),3, IPAddress,port);
 				ds.send(AckPacket);
 				System.out.println("Client sent bye.....EXITING"); 
-				packet_num =0;
+				packet_num =-1;
 				dupPackets.clear();
 				receive = new byte[65535]; 
 				continue; 
@@ -226,10 +260,11 @@ public void actionPerformed(ActionEvent e) {
 			System.out.println("Packet Num: "+packet_num);
 
 			try {
-				if (packet_num%3==0){			 
+				if (!R.reliable.isSelected() && packet_num%10==0){			 
 					continue;
 				}
 				else {
+				R.txtS.setText(Integer.toString(packet_num) );
 				if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
 					ds.send(AckPacket);
 				}

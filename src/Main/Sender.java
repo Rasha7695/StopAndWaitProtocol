@@ -219,7 +219,7 @@ public void processInformation() throws UnknownHostException, IOException {
 				if(data(receive).toString().equals("EOT")){
 				long endTime   = System.nanoTime();
 				long totalTime = endTime - startTime;
-				txtS.setText("Total Transmission time: "+totalTime+" nanoseconds");
+				txtS.setText("Total Transmission time: "+totalTime/1000+" microseconds");
 				break;
 				}
 
