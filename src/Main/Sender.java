@@ -1,20 +1,26 @@
 package Main;
-
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
-import java.nio.ByteBuffer;
+import javax.swing.*;
 
+import java.nio.ByteBuffer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-public class Sender 
+public class Sender  extends JFrame implements ActionListener
 { 
 
 	// A utility method to convert the byte array 
@@ -33,10 +39,92 @@ public class Sender
 		return ret; 
 	} 
 	//long start = System.currentTimeMillis();
+	JLabel lblName;
+JLabel lblSenderPort;
+JLabel lblReceiverPort;
+JLabel lblFile;
+JLabel lblMax;
+JLabel lblTime;
+JTextField txtTime;
+JTextField txtName;
+JTextField txtSenderPort;
+JTextField txtReceiverPort;
+JTextField txtFile;
+JTextField txtMax;
+JButton btnProcess;
+JTextArea txtS;
 	
-	public static void main(String args[]) throws IOException 
-	{ 
-		Scanner sc = new Scanner(System.in); 
+public Sender(){
+	  this.setTitle("Sender GUI");
+    this.setSize(500,500);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    getContentPane().setLayout(null);
+
+    lblName = new JLabel("IP Address: ");
+    lblName.setBounds(10, 10, 90, 21);
+    add(lblName);
+
+    txtName = new JTextField();
+    txtName.setBounds(105, 10, 90, 21);
+    add(txtName);
+
+    lblSenderPort = new JLabel("Sender Port: ");
+    lblSenderPort.setBounds(10, 35, 90, 21);
+    add(lblSenderPort);
+    lblReceiverPort = new JLabel("Receiver Port: ");
+    lblReceiverPort.setBounds(10,60,90,21);
+    add(lblReceiverPort);
+    lblFile = new JLabel("File: ");
+    lblFile.setBounds(10, 90, 90, 21);
+    add(lblFile);
+    lblMax = new JLabel("MDS:");
+    lblMax.setBounds(10,120,90,21);
+    add(lblMax);
+    lblTime = new JLabel ("Timeout:");
+    lblTime.setBounds(130,120,90,21);
+    add(lblTime);
+    txtTime = new JTextField();
+    txtTime.setBounds(200,120,60,21);
+    add(txtTime);
+    txtSenderPort = new JTextField();
+    txtSenderPort.setBounds(105, 35, 90, 21);
+    add(txtSenderPort);
+    txtReceiverPort = new JTextField();
+    txtReceiverPort.setBounds(105, 60, 90, 21);
+    add(txtReceiverPort);
+    txtFile = new JTextField();
+    txtFile.setBounds(60, 90, 120, 21);
+    add(txtFile);
+    txtMax = new JTextField();
+    txtMax.setBounds(60,120,60,21);
+    add(txtMax);
+
+    
+    btnProcess = new JButton("TRANSFER");
+    btnProcess.setBounds(200, 90, 100, 21);
+    btnProcess.addActionListener((ActionListener) this);
+    add(btnProcess);
+
+    txtS = new JTextArea();
+   txtS.setBounds(10, 200, 290, 120);
+   add(txtS);
+
+    this.setVisible(true);
+}
+public void actionPerformed(ActionEvent e) {
+	 if (e.getSource().equals(btnProcess)) {
+        try {
+            processInformation();
+        } catch (UnknownHostException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+    } }
+
+public void processInformation() throws UnknownHostException, IOException {
+
+	Scanner sc = new Scanner(System.in); 
 		int sequenceNumber = 0;
 		long start = System.nanoTime();
 		byte packet =1;
@@ -165,8 +253,12 @@ public class Sender
 					System.out.println("Error while closing stream: " + ioe);
 				}
 			}
+		}
+	
+	public static void main(String args[]) throws IOException 
+	{ 
+		 new Sender();
 
 			
 		} 
 	} 
-//} 
