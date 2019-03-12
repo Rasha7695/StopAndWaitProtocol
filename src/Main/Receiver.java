@@ -1,17 +1,85 @@
 package Main;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-public class Receiver 
-{ 
+import javax.swing.*;
+
+public class Receiver  extends JFrame implements ActionListener
+{ JLabel lblName;
+JLabel lblSenderPort;
+JLabel lblReceiverPort;
+JLabel lblFile;
+JLabel lblNum;
+JTextField txtName;
+JTextField txtSenderPort;
+JTextField txtReceiverPort;
+JTextField txtFile;
+JButton btnProcess;
+JTextField txtS;
+	public Receiver(){
+		  this.setTitle("Receiver GUI");
+	    this.setSize(500,500);
+	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    getContentPane().setLayout(null);
+
+	    lblName = new JLabel("IP Address: ");
+	    lblName.setBounds(10, 10, 90, 21);
+	    add(lblName);
+
+	    txtName = new JTextField();
+	    txtName.setBounds(105, 10, 90, 21);
+	    add(txtName);
+
+	    lblSenderPort = new JLabel("Sender Port: ");
+	    lblSenderPort.setBounds(10, 35, 90, 21);
+	    add(lblSenderPort);
+	    lblReceiverPort = new JLabel("Receiver Port: ");
+	    lblReceiverPort.setBounds(10,60,90,21);
+	    add(lblReceiverPort);
+	    lblFile = new JLabel("File: ");
+	    lblFile.setBounds(10, 90, 90, 21);
+	    add(lblFile);
+	 
+
+	    txtSenderPort = new JTextField();
+	    txtSenderPort.setBounds(105, 35, 90, 21);
+	    add(txtSenderPort);
+	    txtReceiverPort = new JTextField();
+	    txtReceiverPort.setBounds(105, 60, 90, 21);
+	    add(txtReceiverPort);
+	    txtFile = new JTextField();
+	    txtFile.setBounds(60, 90, 120, 21);
+	    add(txtFile);
+	
+	    
+	    btnProcess = new JButton("TRANSFER");
+	    btnProcess.setBounds(200, 90, 100, 21);
+	    btnProcess.addActionListener((ActionListener) this);
+	    add(btnProcess);
+        lblNum = new JLabel("current number of received in-order packet:");
+        lblNum.setBounds(10,120,250,21);
+        add(lblNum);
+	    txtS = new JTextField();
+	   txtS.setBounds(10, 150, 120, 21);
+	   add(txtS);
+
+	    this.setVisible(true);
+	}
+	
+	
+	
 	static byte[] trim(byte[] bytes)
 {
     int i = bytes.length - 1;
@@ -22,23 +90,36 @@ public class Receiver
 
     return Arrays.copyOf(bytes, i + 1);
 }
-	public static void main(String[] args) throws IOException 
-	{ 
-		// Step 1 : Create a socket to listen at port 1234 
-		DatagramSocket ds = new DatagramSocket(1234); 
+public void actionPerformed(ActionEvent e) {
+		 if (e.getSource().equals(btnProcess)) {
+	        try {
+	            processInformation();
+	        } catch (UnknownHostException e1) {
+	            e1.printStackTrace();
+	        } catch (IOException e1) {
+	            e1.printStackTrace();
+	        }
+	    } }
+
+	public void processInformation() throws UnknownHostException, IOException{
+		InetAddress ip = InetAddress.getByName(txtName.getText());
+	    int Senderport = Integer.parseInt(txtSenderPort.getText());
+	    int Receiverport = Integer.parseInt(txtReceiverPort.getText());
+	    File file = new File(txtFile.getText());
+	    
+	    DatagramSocket ds = new DatagramSocket(Receiverport);
 		byte[] receive = new byte[65535];
 		byte[] handbyte = new byte[1]; 
 
 		DatagramPacket DpReceive = null; 
 		DatagramPacket AckPacket = null;
-		FileOutputStream fileOuputStream = new FileOutputStream("outtt",true);
+		FileOutputStream fileOuputStream = new FileOutputStream(file,true);
 		DpReceive = new DatagramPacket(handbyte, 1);
 		ds.receive(DpReceive);
 		//DatagramPacket handshPacket = new DatagramPacket(handbyte, 1);
 		ds.send(DpReceive);
 		handbyte = new byte[65535];
 		HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
-
 		while (true) 
 		{ 
 
@@ -92,6 +173,13 @@ public class Receiver
 			// Clear the buffer after every message. 
 			receive = new byte[65535]; 
 		} 
+	}
+	
+	
+	
+	public static void main(String[] args) throws IOException 
+	{ 
+      new Receiver();
 	} 
 
 	// A utility method to convert the byte array 
@@ -108,5 +196,6 @@ public class Receiver
 			i++; 
 		} 
 		return ret; 
-	} 
+	}
+	
 } 
