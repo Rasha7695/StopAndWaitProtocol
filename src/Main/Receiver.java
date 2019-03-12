@@ -102,18 +102,96 @@ public void actionPerformed(ActionEvent e) {
 	    } }
 
 	public void processInformation() throws UnknownHostException, IOException{
-		InetAddress ip = InetAddress.getByName(txtName.getText());
-	    int Senderport = Integer.parseInt(txtSenderPort.getText());
-	    int Receiverport = Integer.parseInt(txtReceiverPort.getText());
-	    File file = new File(txtFile.getText());
+		// InetAddress ip = InetAddress.getByName(txtName.getText());
+	    // int Senderport = Integer.parseInt(txtSenderPort.getText());
+	    // int Receiverport = Integer.parseInt(txtReceiverPort.getText());
+	    // File file = new File(txtFile.getText());
 	    
-	    DatagramSocket ds = new DatagramSocket(Receiverport);
+	    // DatagramSocket ds = new DatagramSocket(Receiverport);
+		// byte[] receive = new byte[65535];
+		// byte[] handbyte = new byte[1]; 
+
+		// DatagramPacket DpReceive = null; 
+		// DatagramPacket AckPacket = null;
+		// FileOutputStream fileOuputStream = new FileOutputStream(file,true);
+		// DpReceive = new DatagramPacket(handbyte, 1);
+		// ds.receive(DpReceive);
+		// ds.send(DpReceive);
+		// handbyte = new byte[65535];
+		// HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
+		// int packet_num = 0;
+		// while (true) 
+		// {
+		// 	// Step 2 : create a DatgramPacket to receive the data. 
+		// 	DpReceive = new DatagramPacket(receive, receive.length);
+
+		// 	// Step 3 : revieve the data in byte buffer. 
+		// 	ds.receive(DpReceive);
+		// 	InetAddress IPAddress = DpReceive.getAddress();
+		// 	int port = DpReceive.getPort();
+		// 	if (data(receive).toString().equals("EOT")) 
+		// 	{ 
+		// 		AckPacket = new DatagramPacket("EOT".getBytes(),3, IPAddress,port);
+		// 		ds.send(AckPacket);
+		// 		System.out.println("Client sent bye.....EXITING"); 
+		// 		break; 
+		// 	}
+		// 	packet_num++;
+		// 	System.out.println(data(receive));
+		// 	byte sequenceNumber[] = Arrays.copyOfRange(receive, 0, 4);
+		// 	System.out.println("Sequence Number:-" + ByteBuffer.wrap(sequenceNumber).getInt());
+			
+		// 	AckPacket = new DatagramPacket(sequenceNumber, sequenceNumber.length, IPAddress,port);
+		// 	byte data[] = Arrays.copyOfRange(receive, 4, receive.length);
+		// 	System.out.println("Packet Num: "+packet_num);
+
+		// 	try {
+		// 		if (packet_num%3==0){			 
+		// 			continue;
+		// 		}
+		// 		else {
+		// 		if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
+		// 			ds.send(AckPacket);
+		// 		}
+				
+		// 		else{
+		// 			dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
+		// 			fileOuputStream.write(trim(data));
+		// 			ds.send(AckPacket);
+		// 		}
+		// 		}
+		// 	} catch (IOException e) {
+		// 		e.printStackTrace();
+		// 	}
+	
+			
+
+		// 	System.out.println("Client:-" + data(data)); 
+
+		// 	// Exit the server if the client sends "bye" 
+			
+		// 	// Clear the buffer after every message. 
+		// 	receive = new byte[65535]; 
+		// } 
+	}
+	
+	
+	
+	public static void main(String[] args) throws IOException 
+	{ 
+	  //new Receiver();
+	  	// InetAddress ip = InetAddress.getByName(txtName.getText());
+	    // int Senderport = Integer.parseInt(txtSenderPort.getText());
+	    // int Receiverport = Integer.parseInt(txtReceiverPort.getText());
+	    // File file = new File(txtFile.getText());
+	    
+	    DatagramSocket ds = new DatagramSocket(1234);
 		byte[] receive = new byte[65535];
 		byte[] handbyte = new byte[1]; 
 
 		DatagramPacket DpReceive = null; 
 		DatagramPacket AckPacket = null;
-		FileOutputStream fileOuputStream = new FileOutputStream(file,true);
+		FileOutputStream fileOuputStream = new FileOutputStream("Main\\outt",true);
 		DpReceive = new DatagramPacket(handbyte, 1);
 		ds.receive(DpReceive);
 		ds.send(DpReceive);
@@ -121,12 +199,10 @@ public void actionPerformed(ActionEvent e) {
 		HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
 		int packet_num = 0;
 		while (true) 
-		{ 
-
+		{
 			// Step 2 : create a DatgramPacket to receive the data. 
 			DpReceive = new DatagramPacket(receive, receive.length);
-
-			// Step 3 : revieve the data in byte buffer. 
+			// Step 3 : revieve the data in byte buffer.
 			ds.receive(DpReceive);
 			InetAddress IPAddress = DpReceive.getAddress();
 			int port = DpReceive.getPort();
@@ -135,7 +211,10 @@ public void actionPerformed(ActionEvent e) {
 				AckPacket = new DatagramPacket("EOT".getBytes(),3, IPAddress,port);
 				ds.send(AckPacket);
 				System.out.println("Client sent bye.....EXITING"); 
-				break; 
+				packet_num =0;
+				dupPackets.clear();
+				receive = new byte[65535]; 
+				continue; 
 			}
 			packet_num++;
 			System.out.println(data(receive));
@@ -173,14 +252,7 @@ public void actionPerformed(ActionEvent e) {
 			
 			// Clear the buffer after every message. 
 			receive = new byte[65535]; 
-		} 
-	}
-	
-	
-	
-	public static void main(String[] args) throws IOException 
-	{ 
-      new Receiver();
+		}
 	} 
 
 	// A utility method to convert the byte array 
