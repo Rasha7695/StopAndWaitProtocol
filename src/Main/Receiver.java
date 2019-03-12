@@ -35,11 +35,10 @@ public class Receiver
 		FileOutputStream fileOuputStream = new FileOutputStream("Main\\outt",true);
 		DpReceive = new DatagramPacket(handbyte, 1);
 		ds.receive(DpReceive);
-		//DatagramPacket handshPacket = new DatagramPacket(handbyte, 1);
 		ds.send(DpReceive);
 		handbyte = new byte[65535];
 		HashMap<Integer, Integer> dupPackets = new HashMap<Integer, Integer>();
-
+		int packet_num = 0;
 		while (true) 
 		{ 
 
@@ -48,20 +47,29 @@ public class Receiver
 
 			// Step 3 : revieve the data in byte buffer. 
 			ds.receive(DpReceive);
-			System.out.println(data(receive));
-			byte sequenceNumber[] = Arrays.copyOfRange(receive, 0, 4);
-			//int message = ByteBuffer.wrap(DpReceive.getData()).getInt();
-
-			// ByteBuffer wrapped = ByteBuffer.wrap(sequenceNumber); // big-endian by default
-			// int num = wrapped.getInt(); // 1
-			System.out.println("Sequence Number:-" + ByteBuffer.wrap(sequenceNumber).getInt());
 			InetAddress IPAddress = DpReceive.getAddress();
 			int port = DpReceive.getPort();
+			if (data(receive).toString().equals("EOT")) 
+			{ 
+				AckPacket = new DatagramPacket("EOT".getBytes(),3, IPAddress,port);
+				ds.send(AckPacket);
+				System.out.println("Client sent bye.....EXITING"); 
+				break; 
+			}
+			packet_num++;
+			System.out.println(data(receive));
+			byte sequenceNumber[] = Arrays.copyOfRange(receive, 0, 4);
+			System.out.println("Sequence Number:-" + ByteBuffer.wrap(sequenceNumber).getInt());
+			
 			AckPacket = new DatagramPacket(sequenceNumber, sequenceNumber.length, IPAddress,port);
 			byte data[] = Arrays.copyOfRange(receive, 4, receive.length);
-
+			System.out.println("Packet Num: "+packet_num);
 
 			try {
+				if (packet_num%3==0){			 
+					continue;
+				}
+				else {
 				if(dupPackets.containsValue(ByteBuffer.wrap(sequenceNumber).getInt())){
 					ds.send(AckPacket);
 				}
@@ -69,6 +77,7 @@ public class Receiver
 					dupPackets.put(ByteBuffer.wrap(sequenceNumber).getInt(),1);
 					fileOuputStream.write(trim(data));
 					ds.send(AckPacket);
+				}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -79,12 +88,7 @@ public class Receiver
 			System.out.println("Client:-" + data(data)); 
 
 			// Exit the server if the client sends "bye" 
-			if (data(receive).toString().equals("bye")) 
-			{ 
-				System.out.println("Client sent bye.....EXITING"); 
-				//break; 
-			} 
-
+			
 			// Clear the buffer after every message. 
 			receive = new byte[65535]; 
 		} 

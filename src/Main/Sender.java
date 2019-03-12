@@ -16,6 +16,22 @@ import java.io.FileNotFoundException;
 
 public class Sender 
 { 
+
+	// A utility method to convert the byte array 
+	// data into a string representation. 
+	public static StringBuilder data(byte[] a) 
+	{ 
+		if (a == null) 
+			return null; 
+		StringBuilder ret = new StringBuilder(); 
+		int i = 0; 
+		while (a[i] != 0) 
+		{ 
+			ret.append((char) a[i]); 
+			i++; 
+		} 
+		return ret; 
+	} 
 	//long start = System.currentTimeMillis();
 	
 	public static void main(String args[]) throws IOException 
@@ -31,21 +47,17 @@ public class Sender
 		// carrying the data. 
 		DatagramSocket ds = new DatagramSocket(); 
 
-		//InetAddress ip = InetAddress.getLocalHost(); 
 		byte buf[] = null; 
 		System.out.println("Please enter the IP address of the receiver");
 		InetAddress ip = InetAddress.getByName(sc.nextLine());
 		System.out.println("Please enter port number of the receiver");
 		int port = sc.nextInt();
 		sc.nextLine();
-		// loop while user not enters "bye" 
-	//	while (true) 
-	//	{ 
-		//	String inp = sc.nextLine(); 
 
 			File file = new File("Main\\hello.txt");
 			FileInputStream fin = null;
 			try {
+				long startTime = System.nanoTime();
 				// create FileInputStream object
 				fin = new FileInputStream(file);
 				double n = (int)file.length();
@@ -61,26 +73,13 @@ public class Sender
 					ds.receive(handbyte);
 				}
 
-
-
-
-				//byte header[] = new byte[10];
 				for(int i=0;i<cycles;i++){
 					sequenceNumber+=1;
-					//byte seq = (byte) sequenceNumber;
 					header = new byte[4];
 					header = ByteBuffer.allocate(4).putInt(sequenceNumber).array();
 					System.out.println("Header size: "+header.length);
 					byte fileContent[] = new byte[MDS];
 					bytesRead+=i;
-					//fileContent[0]=(byte)(sequenceNumber>>8);
-					//fileContent[1]=(byte)(sequenceNumber);
-					
-					//set sequence acknowledgement code (valid and not valid)
-					//if (packet == 0) {packet = 1;}
-					//else {packet = 0;}
-					//fileContent[0] = packet;
-					
 				// Reads up to certain bytes of data from this input stream into an array of bytes.
 				fin.read(fileContent);
 				//create string from byte array
@@ -102,50 +101,52 @@ public class Sender
 			// Step 3 : invoke the send call to actually send 
 			// the data. 
 			ds.send(DpSend); 
-			byte seqNum[] = new byte[4];
-			DatagramPacket ack = new DatagramPacket(seqNum, 4);
-			ds.receive(ack);
-			System.out.println(ByteBuffer.wrap(header).getInt());
-			System.out.println(ByteBuffer.wrap(seqNum).getInt());
-
-			//Compare ByteBuffer.wrap(header).getInt() == ByteBuffer.wrap(seqNum).getInt()
-
-			// ByteBuffer wrapped = ByteBuffer.wrap(ack.getData()); // big-endian by default
-			// int num = wrapped.getInt(); // 1
-			// System.out.println("Acked packet sequence number: "+num);
-			//ds.setSoTimeout(timeout);
-			
-			//Receive acknowledgement 
-			// boolean response = false;
-			// while (response ==false) {
-			// 	byte[] ack = new byte[4];
-			// 	DatagramPacket dsAck = new DatagramPacket(ack,4);
-			// 	try {
-			// 		ds.receive(dsAck);
-			// 		ack = dsAck.getData();
-			// 		//check if ack is valid and packet is not lost 
-			// 		if (fileContent[0] == (ack[dsAck.getLength()-1]%2)) {
-			// 			response = true;
-			// 		}
-			// 		//if it was lost or not valid, we need to resend packet
-			// 		else {
-			// 			ds.send(DpSend);
-			// 			ds.setSoTimeout(timeout);
-			// 		}
-			// 	}
-			// 	catch(SocketTimeoutException e ) {
-			// 		ds.send(DpSend);
-			// 		ds.setSoTimeout(timeout);
-			// 	}
-			// }
-
-			// break the loop if user enters "bye" 
-			// if (inp.equals("bye")) 
-			// 	break; 
+			ds.setSoTimeout(timeout);
+			boolean response = false;
+			while (response ==false) {
+				byte seqNum[] = new byte[4];
+				DatagramPacket ack = new DatagramPacket(seqNum, 4);
+				
+			try {
+					ds.receive(ack);
+				if (ByteBuffer.wrap(header).getInt()==ByteBuffer.wrap(seqNum).getInt()) {
+						response = true;
+						continue;
 				}
+			}
+		 	catch(SocketTimeoutException e ) {
+					ds.send(DpSend);
+			 		ds.setSoTimeout(timeout);
+			 	}
+			}
+			//Compare ByteBuffer.wrap(header).getInt() == ByteBuffer.wrap(seqNum).getInt()
+			}
+			fin.close();
+			//byte eot[] = 
+			DatagramPacket EOT = new DatagramPacket("EOT".getBytes(),3,ip,port);
+			ds.send(EOT);
+			ds.setSoTimeout(timeout);
+			boolean response = false;
+			while (response ==false) {
+				byte[] receive = new byte[50];
+				DatagramPacket AckEOT = new DatagramPacket(receive, receive.length);
 				
-	 
-				
+			try {
+				ds.receive(AckEOT);
+				if(data(receive).toString().equals("EOT")){
+				long endTime   = System.nanoTime();
+				long totalTime = endTime - startTime;
+				System.out.println(totalTime);
+				continue;
+				}
+
+			}
+		 	catch(SocketTimeoutException e ) {
+					ds.send(EOT);
+			 		ds.setSoTimeout(timeout);
+			 	}
+			}
+							
 			 }
 			catch (FileNotFoundException e) {
 				System.out.println("File not found" + e);
