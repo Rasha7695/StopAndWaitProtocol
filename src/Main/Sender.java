@@ -124,35 +124,30 @@ public void actionPerformed(ActionEvent e) {
 
 public void processInformation() throws UnknownHostException, IOException {
 
-	Scanner sc = new Scanner(System.in); 
 		int sequenceNumber = 0;
 		long start = System.nanoTime();
-		byte packet =1;
-		int bytesRead = 0;
-		int timeout = 200; //temporary timeout placeholder in miliseconds
+		InetAddress ip = InetAddress.getByName(txtName.getText());
+   	int Senderport = Integer.parseInt(txtSenderPort.getText());
+    int Receiverport = Integer.parseInt(txtReceiverPort.getText());
+	File file = new File(txtFile.getText());
+	int MDS = Integer.parseInt(txtMax.getText());
+	int timeout = Integer.parseInt(txtTime.getText());
+
 
 		// Step 1:Create the socket object for 
 		// carrying the data. 
 		DatagramSocket ds = new DatagramSocket(); 
 
-		byte buf[] = null; 
-		System.out.println("Please enter the IP address of the receiver");
-		InetAddress ip = InetAddress.getByName(sc.nextLine());
-		System.out.println("Please enter port number of the receiver");
-		int port = sc.nextInt();
-		sc.nextLine();
-
-			File file = new File("Main\\hello.txt");
+		byte buf[] = null;
 			FileInputStream fin = null;
 			try {
 				long startTime = System.nanoTime();
 				// create FileInputStream object
 				fin = new FileInputStream(file);
 				double n = (int)file.length();
-				int MDS = 50;
 				double cycles = Math.ceil(n/MDS);
 				byte header[] = new byte[] {1};
-				DatagramPacket handshakePacket = new DatagramPacket(header, 1, ip, port);
+				DatagramPacket handshakePacket = new DatagramPacket(header, 1, ip, Receiverport);
 				DatagramPacket handbyte = new DatagramPacket(header, 1);
 				ds.send(handshakePacket);
 				ds.receive(handbyte);
@@ -167,7 +162,7 @@ public void processInformation() throws UnknownHostException, IOException {
 					header = ByteBuffer.allocate(4).putInt(sequenceNumber).array();
 					System.out.println("Header size: "+header.length);
 					byte fileContent[] = new byte[MDS];
-					bytesRead+=i;
+					//bytesRead+=i;
 				// Reads up to certain bytes of data from this input stream into an array of bytes.
 				fin.read(fileContent);
 				//create string from byte array
@@ -182,7 +177,7 @@ public void processInformation() throws UnknownHostException, IOException {
 			outputStream.write( fileContent );
 			byte sndBuf[] = outputStream.toByteArray( );
 			DatagramPacket DpSend = 
-				new DatagramPacket(sndBuf, sndBuf.length, ip, port); 
+				new DatagramPacket(sndBuf, sndBuf.length, ip, Receiverport); 
 
 			
 
@@ -211,7 +206,7 @@ public void processInformation() throws UnknownHostException, IOException {
 			}
 			fin.close();
 			//byte eot[] = 
-			DatagramPacket EOT = new DatagramPacket("EOT".getBytes(),3,ip,port);
+			DatagramPacket EOT = new DatagramPacket("EOT".getBytes(),3,ip,Receiverport);
 			ds.send(EOT);
 			ds.setSoTimeout(timeout);
 			boolean response = false;
@@ -237,10 +232,10 @@ public void processInformation() throws UnknownHostException, IOException {
 							
 			 }
 			catch (FileNotFoundException e) {
-				System.out.println("File not found" + e);
+				txtS.setText("File not found" + e);
 			}
 			catch (IOException ioe) {
-				System.out.println("Exception while reading file " + ioe);
+				txtS.setText("Exception while reading file " + ioe);
 			}
 			finally {
 				// close the streams using close method
@@ -250,7 +245,7 @@ public void processInformation() throws UnknownHostException, IOException {
 					}
 				}
 				catch (IOException ioe) {
-					System.out.println("Error while closing stream: " + ioe);
+					txtS.setText("Error while closing stream: " + ioe);
 				}
 			}
 		}
