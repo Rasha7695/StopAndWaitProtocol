@@ -27,6 +27,7 @@ JTextField txtSenderPort;
 JTextField txtReceiverPort;
 JTextField txtFile;
 JButton btnProcess;
+JButton reliable;
 JTextField txtS;
 	public Receiver(){
 		  this.setTitle("Receiver GUI");
@@ -74,6 +75,11 @@ JTextField txtS;
 	    txtS = new JTextField();
 	   txtS.setBounds(10, 150, 120, 21);
 	   add(txtS);
+	      reliable = new JButton("Reliable");
+	   reliable.setBounds(250,300,100,21);
+	   reliable.addActionListener((ActionListener) this);
+	   add(reliable);
+	   
 
 	    this.setVisible(true);
 	}
