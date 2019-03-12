@@ -99,7 +99,19 @@ public void actionPerformed(ActionEvent e) {
 	        } catch (IOException e1) {
 	            e1.printStackTrace();
 	        }
-	    } }
+	    }
+		 if (e.getSource().equals(reliable)) {
+			 if (reliable.isSelected()) {//reliable option 
+				 reliable.setText("Unreliable");
+				 }
+			 else {
+				 //unreliable option
+				 reliable.setText("Reliable");
+			 }
+			 }
+		 
+		 
+}
 
 	public void processInformation() throws UnknownHostException, IOException{
 		// InetAddress ip = InetAddress.getByName(txtName.getText());
